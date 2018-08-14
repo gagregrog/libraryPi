@@ -1,6 +1,6 @@
 from imutils.video import VideoStream
 from pyzbar import pyzbar
-import imutils
+import platform
 import time
 import cv2
 import isbn
@@ -10,7 +10,9 @@ red = (0, 0, 255)
 
 print("[INFO] Starting stream...")
 
-vs = VideoStream(usePiCamera=True).start()
+camera = {"usePiCamera": True} if platform.system() == 'Linux' else {"src": 0}
+
+vs = VideoStream(**camera).start()
 time.sleep(2.0)
 
 found_barcodes = set()
