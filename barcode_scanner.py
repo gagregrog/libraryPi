@@ -44,8 +44,6 @@ while True:
     if key == ord("q"):
         break
 
-    time.sleep(0.1)
-
 print("[INFO] Closing stream...")
 csv.write_new_to_csv()
 cv2.destroyAllWindows()
