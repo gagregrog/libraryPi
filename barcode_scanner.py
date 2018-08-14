@@ -3,10 +3,11 @@ from pyzbar import pyzbar
 import platform
 import time
 import cv2
-import isbn
+from handle_csv import CsvHandler
 
-outfile = "barcodes.csv"
 red = (0, 0, 255)
+
+csv = CsvHandler()
 
 print("[INFO] Starting stream...")
 
@@ -15,37 +16,27 @@ camera = {"usePiCamera": True} if platform.system() == 'Linux' else {"src": 0}
 vs = VideoStream(**camera).start()
 time.sleep(2.0)
 
-found_barcodes = set()
-
-csv = open(outfile, "w")
-
 while True:
     frame = vs.read()
-
     height, width = frame.shape[:2]
-    new_height = 400 / width * height
+    new_height = 800 / width * height
+    frame = cv2.resize(frame, (800, int(new_height)), interpolation=cv2.INTER_CUBIC)
 
-    frame = cv2.resize(frame, (400, int(new_height)), interpolation=cv2.INTER_CUBIC)
     barcodes = pyzbar.decode(frame)
 
     for barcode in barcodes:
         (x, y, w, h) = barcode.rect
         cv2.rectangle(frame, (x, y), (x + w, y + h), red, 2)
 
-        barcode_data = barcode.data.decode("utf-8")
+        isbn = barcode.data.decode("utf-8")
         barcode_type = barcode.type
-        
-        cv2.putText(frame, str(barcode_data), (x, y - 20),
-            cv2.FONT_HERSHEY_SIMPLEX,0.5, red, 2)
-       
-        if barcode_data not in found_barcodes:
-            csv.write("{}\r\n".format(barcode_data))
-            csv.flush()
-            found_barcodes.add(barcode_data)
-            title = isbn.get_title_from_isbn(barcode_data)
-            
-            print("[INFO] {}: {}".format(barcode_type, barcode_data))
-            print("[INFO] Title:  {}".format(title)) 
+
+        csv.add_book(isbn)
+        display_name = csv.get_display_data(isbn)
+
+        cv2.putText(frame, display_name, (x, y - 20),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 2)
+
 
     cv2.imshow("Barcode Scanner", frame)
     key = cv2.waitKey(1) & 0xFF
@@ -53,7 +44,9 @@ while True:
     if key == ord("q"):
         break
 
+    time.sleep(0.1)
+
 print("[INFO] Closing stream...")
-csv.close()
+csv.write_new_to_csv()
 cv2.destroyAllWindows()
 vs.stop()
