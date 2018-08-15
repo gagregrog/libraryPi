@@ -215,3 +215,6 @@ pip-selfcheck.json
 
 barcodes.csv
 .idea/
+library-books.csv
+library-pi.sqlite
+.vscode/
