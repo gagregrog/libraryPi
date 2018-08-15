@@ -2,6 +2,7 @@ certifi==2018.8.13
 chardet==3.0.4
 idna==2.7
 imutils==0.4.6
+isbnlib==3.9.1
 numpy==1.15.0
 picamera==1.13
 pyzbar==0.1.7
