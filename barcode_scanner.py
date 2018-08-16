@@ -34,6 +34,10 @@ while True:
         qr_code = barcode_type == 'QRCODE'
 
         (x, y, w, h) = barcode.rect
+
+        if int(w) < 100 or int(h) < 40:
+            continue
+
         cv2.rectangle(frame, (x, y), (x + w, y + h), red, 2)
 
         display_name = csv.add_book(isbn, qr_code, db.add_book)

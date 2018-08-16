@@ -8,7 +8,7 @@ def join_authors(book):
     authors = book['author_1']
 
     author_2 = book['author_2']
-    author_3 = book['author_2']
+    author_3 = book['author_3']
 
     if author_2:
         authors = '{}, {}'.format(authors, author_2)
@@ -78,15 +78,13 @@ class CsvHandler:
                 'year': book['Year']
             }
 
-        display_data = self.get_display_data(original_isbn, qr_code)
-
         if new_book:
-            print("[INFO] __NEW_BOOK__ {}".format(display_data))
+            print("[INFO] __NEW_BOOK__ {}".format(book['title']))
             add_book_to_db(book)
             self.book_data[isbn] = book
             self.new_books[isbn] = book
 
-        return display_data
+        return self.get_display_data(original_isbn, qr_code)
 
     def get_display_data(self, isbn, qr_code):
         if qr_code:
