@@ -3,7 +3,7 @@ import atexit
 
 
 book_table = """CREATE TABLE IF NOT EXISTS books (
-                    id TEXT PRIMARY KEY,
+                    isbn TEXT PRIMARY KEY,
                     title TEXT,
                     author_1 TEXT,
                     author_2 TEXT,
@@ -28,6 +28,8 @@ class Database:
         atexit.register(self.disconnect)
         self.conn = sqlite3.connect(filename)
         self.create_tables()
+        print('[INFO] DB Loaded')
+        [print(row) for row in self.get_all_books()]
 
     def disconnect(self):
         self.conn.commit()
@@ -47,7 +49,8 @@ class Database:
         try:
             c = self.conn.cursor()
             command = """INSERT OR IGNORE INTO users (id, first_name, last_name, isbn_1, isbn_2, created)
-                            VALUES ('{}', '{}', '{}', '{}', '{}', CURRENT_TIMESTAMP)""".format(
+                            VALUES ("{}", "{}", "{}", "{}", "{}", CURRENT_TIMESTAMP)""".format(
+
                 user['id'],
                 user['first_name'],
                 user['last_name'],
@@ -64,9 +67,9 @@ class Database:
     def add_book(self, book):
         try:
             c = self.conn.cursor()
-            command = """INSERT OR IGNORE INTO books (id, title, author_1, author_2, author_3, publisher, year, created)
-                            VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', CURRENT_TIMESTAMP)""".format(
-                book['id'],
+            command = """INSERT OR IGNORE INTO books (isbn, title, author_1, author_2, author_3, publisher, year, created)
+                            VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}", CURRENT_TIMESTAMP)""".format(
+                book['isbn'],
                 book['title'],
                 book['author_1'],
                 book.get('author_2'),
@@ -75,6 +78,7 @@ class Database:
                 book['year'])
 
             c.execute(command)
+            print('[INFO] Adding book to database')
 
         except Exception as e:
             print('[ERROR] Failed to add book')

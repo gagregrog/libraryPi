@@ -5,15 +5,16 @@ import time
 import cv2
 from handle_csv import CsvHandler
 import isbnlib
+from database import Database
 
 red = (0, 0, 255)
 csv = CsvHandler()
-
+db = Database()
 
 print("[INFO] Starting stream...")
 camera = {"usePiCamera": True} if platform.system() == 'Linux' else {"src": 0}
 vs = VideoStream(**camera).start()
-time.sleep(2.0)
+time.sleep(1.0)
 
 while True:
     frame = vs.read()
@@ -35,7 +36,7 @@ while True:
         (x, y, w, h) = barcode.rect
         cv2.rectangle(frame, (x, y), (x + w, y + h), red, 2)
 
-        display_name = csv.add_book(isbn, qr_code)
+        display_name = csv.add_book(isbn, qr_code, db.add_book)
 
         if display_name:
             cv2.putText(frame, display_name, (x, y - 20),

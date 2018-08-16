@@ -40,7 +40,6 @@ class CsvHandler:
                     isbn = row['isbn']
                     self.isbns.add(isbn)
                     self.book_data[isbn] = row
-                    print(row)
 
         except Exception as e:
             print('[INFO] Creating File - {}'.format(self.filename))
@@ -48,24 +47,26 @@ class CsvHandler:
                 writer = csv.DictWriter(csv_file, fieldnames=self.fieldnames)
                 writer.writeheader()
 
-    def add_book(self, isbn, qr_code=False):
+    def add_book(self, isbn, qr_code, add_book_to_db):
         new_book = False
         original_isbn = isbn
 
         if isbn not in self.isbns:
             new_book = True
-            self.isbns.add(isbn)
             try:
                 book = isbnlib.meta(isbn)
+                self.isbns.add(original_isbn)
             except Exception as e:
-                print(e)
+                # this catches errors that originate from isbnlib
                 return None
-
 
             if qr_code:
                 self.qr_codes[isbn] = book['ISBN-13']
                 isbn = book['ISBN-13']
-                self.isbns.add(isbn)
+                if isbn in self.isbns:
+                    new_book = False
+                else:
+                    self.isbns.add(isbn)
 
             book = {
                 'isbn': isbn,
@@ -77,13 +78,13 @@ class CsvHandler:
                 'year': book['Year']
             }
 
-            self.book_data[isbn] = book
-            self.new_books[isbn] = book
-
         display_data = self.get_display_data(original_isbn, qr_code)
 
         if new_book:
             print("[INFO] __NEW_BOOK__ {}".format(display_data))
+            add_book_to_db(book)
+            self.book_data[isbn] = book
+            self.new_books[isbn] = book
 
         return display_data
 
