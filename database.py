@@ -1,5 +1,4 @@
 import sqlite3
-import atexit
 import bcrypt
 
 
@@ -25,11 +24,8 @@ user_table = """CREATE TABLE IF NOT EXISTS users (
 
 class Database:
     def __init__(self, filename='library-pi.sqlite'):
-        atexit.register(self.disconnect)
         self.conn = sqlite3.connect(filename)
         self.create_tables()
-        # print('[INFO] DB Loaded')
-        # [print(row) for row in self.get_all_books()]
 
     def disconnect(self):
         self.conn.commit()
