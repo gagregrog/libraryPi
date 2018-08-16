@@ -79,7 +79,8 @@ class Database:
             )
 
             c.execute(command)
-            return user, None
+            db_user = (user['email'], user['hash'], 'None', 'None')
+            return db_user, None
 
         except Exception as e:
             print('[ERROR] Failed to add user')
