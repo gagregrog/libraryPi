@@ -183,6 +183,7 @@ def greet(user, get_display_name):
 
     if num_books > 0:
         message += """
+    
         
 [1] {}        
 """.format(get_display_name(books[0]))

@@ -141,10 +141,10 @@ class Database:
             if result:
                 isbn_1, isbn_2 = result
             else:
-                return 'User Not Found'
+                return None, 'User Not Found'
 
             if isbn_1 == book_id or isbn_2 == book_id:
-                return 'Book Already Checked Out'
+                return None, 'Book Already Checked Out'
 
             idx = 'isbn_1' if isbn_1 == 'None' else 'isbn_2' if isbn_2 == 'None' else None
 
@@ -153,13 +153,14 @@ class Database:
                     idx=idx, book_id=book_id, email=email)
                 c.execute(update_user)
 
-                return self.get_user(email)
+                return self.get_user(email), None
             else:
-                return 'Overdrawn'
+                return None, 'Overdrawn'
 
         except Exception as e:
             print('[ERROR] Failed to check out book')
             print(e)
+            return None, e
 
     def return_book(self, email, book_id):
         try:
