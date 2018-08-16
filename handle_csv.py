@@ -79,14 +79,13 @@ class CsvHandler:
             }
 
         if new_book:
-            # print("[INFO] __NEW_BOOK__ {}".format(book['title']))
             add_book_to_db(book)
             self.book_data[isbn] = book
             self.new_books[isbn] = book
 
         return {
             'display_name': self.get_display_data(original_isbn, qr_code),
-            **self.get_book_data(isbn)
+            **self.get_book_data(original_isbn, qr_code)
         }
 
     def get_display_data(self, isbn, qr_code=False):
@@ -100,7 +99,10 @@ class CsvHandler:
 
         return '{} - {}'.format(book['title'], join_authors(book))
 
-    def get_book_data(self, isbn):
+    def get_book_data(self, isbn, qr_code):
+        if qr_code:
+            isbn = self.qr_codes[isbn]
+
         book = self.book_data.get(isbn)
 
         if book is None or book.get('title') is None:
