@@ -173,10 +173,10 @@ class Database:
             if result:
                 isbn_1, isbn_2 = result
             else:
-                return 'User Not Found'
+                return None, 'User Not Found'
 
             if book_id not in [isbn_1, isbn_2]:
-                return 'Book Not Checked Out'
+                return None, 'Book Not Checked Out'
 
             if book_id == isbn_1:
                 isbn_1 = isbn_2
@@ -188,11 +188,12 @@ class Database:
 
             c.execute(update_user)
 
-            return self.get_user(email)
+            return self.get_user(email), None
 
         except Exception as e:
             print('[ERROR] Failed to return book')
             print(e)
+            return None, e
 
     def get_all_books(self):
         try:

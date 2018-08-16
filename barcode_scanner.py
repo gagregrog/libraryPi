@@ -72,28 +72,54 @@ def start_scanner(db, csv, user):
 
             if found_book:
                 cv2.putText(frame, found_book['display_name'], (x, y - 20),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 1.5)
-                if found_book['isbn'] != last_book_found.get('isbn'):
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 1)
+                isbn = found_book['isbn']
+
+                if isbn != last_book_found.get('isbn'):
                     last_book_found = found_book
 
-                    print("""Title: {}
-Authors: {}
-Year: {}
-Publisher: {}
+                    message = "Title: {}\n\nAuthors: {}\n\n".format(found_book['title'], found_book['authors'])
 
-""".format(found_book['title'], found_book['authors'], found_book['year'], found_book['publisher']))
+                    year = found_book['year']
+                    publisher = found_book['publisher']
+
+                    if year:
+                        message += 'Year: {}\n\n'.format(year)
+
+                    if publisher:
+                        message += 'Publisher: {}\n\n'.format(publisher)
+
+                    try:
+                        desc = isbnlib.desc(isbn)
+                        if desc:
+                            message += 'Description: {}\n\n'.format(desc)
+                    except Exception:
+                        pass
+                    system('clear')
+                    print(message)
 
         # Display user's email on video
         cv2.putText(frame, user[0], (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, black, 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, red, 2)
 
         # Display checked out quantity on video
         cv2.putText(frame, 'Books Remaining: {}'.format(books_remaining), (10, 50),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, black, 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, red, 2)
 
         title = last_book_found.get('title')
         if title:
-            cv2.putText(frame, "Selected: {}".format(title), (10, new_height - 20),
+            isbn = last_book_found['isbn']
+            message = 'Press "Y" to check out this book.'
+
+            if isbn in [isbn_1, isbn_2]:
+                message = 'Press "R" to return this book.'
+            elif isbn_2:
+                message = 'You must return a book before checking out a new one.'
+
+            cv2.putText(frame, message, (10, new_height - 15),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, red, 2)
+
+            cv2.putText(frame, "Selected: {}".format(title), (10, new_height - 40),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.75, red, 2)
 
         cv2.imshow("Barcode Scanner", frame)
@@ -103,7 +129,7 @@ Publisher: {}
             break
 
         if last_book_found.get('title'):
-            if key in [ord("O"), ord("o")]:
+            if key in [ord("Y"), ord("y")]:
                 isbn = last_book_found['isbn']
                 ok, error = can_checkout(isbn, user)
                 if ok:
@@ -113,7 +139,6 @@ Publisher: {}
                         user = updated_user
                         print("Successfully checked out {}!\n".format(last_book_found['title']))
                     else:
-
                         print('[ERROR] Something went wrong', error)
                 else:
                     print('[ERROR] ', error)
@@ -121,8 +146,20 @@ Publisher: {}
                 last_book_found = {}
 
 
-            if key in [ord("I"), ord("i")]:
-                print('want to checkin')
+            if key in [ord("R"), ord("r")]:
+                isbn = last_book_found['isbn']
+                if isbn in [isbn_1, isbn_2]:
+                    updated_user, error = db.return_book(user[0], isbn)
+
+                    if updated_user:
+                        user = updated_user
+                        print("Successfully returned {}!\n".format(last_book_found['title']))
+                    else:
+                        print('[ERROR] ', error)
+                else:
+                    print('[ERROR] This book is not checked out to you.\n\nIf you would like to check it out, please scan it again and then press "Y"')
+
+                last_book_found = {}
 
     print("[INFO] Closing stream...")
     cv2.destroyAllWindows()

@@ -203,10 +203,14 @@ def display_instructions(new_user=False):
     message = """1) Wait for the video stream to initialize.
 
 2) Hold the barcode of a book up to the camera. 
+
    If the camera can read it, its information will be displayed.
 
-3) Once the book has been identified, press "O" to check it out, or "I" to check it in. 
+3) Once the book has been identified, press "Y" to check it out, or "R" to return it. 
+
    You may have at most two books checked out at the same time.
+   
+   Make sure the video window is focused before typing.
    
 4) To quit and logout, press "Q".
 
