@@ -65,9 +65,11 @@ You can check out and return books at your leisure.
 Please CREATE an account or LOGIN.
 
 
-[1] Login to an Existing Account
+[1] LOGIN to an Existing Account
     
-[2] Create an Account
+[2] CREATE an Account
+
+[3] Instructions
 
 [J] Julia Set Visualizer
 
@@ -81,7 +83,7 @@ Please CREATE an account or LOGIN.
         while 1:
             try:
                 c = sys.stdin.read(1)
-                if c in ['1', '2', 'j', 'J', 'q', 'Q']:
+                if c in ['1', '2', '3', 'j', 'J', 'q', 'Q']:
                     return c
             except IOError: pass
     finally:
@@ -147,6 +149,9 @@ def handle_auth(add_user_to_db, check_credentials_in_db):
             user, error = signup(add_user_to_db)
             if error == 'duplicate':
                 error = 'There is already an account associated with that email address.'
+        elif intent == '3':
+            display_instructions()
+            continue
         elif intent.lower() == 'j':
             start_julia()
             continue
@@ -162,7 +167,9 @@ def handle_auth(add_user_to_db, check_credentials_in_db):
 Please press ENTER to return to the main menu.""".format(error))
             continue
 
-        return user
+        new_user = intent == '2'
+
+        return user, new_user
 
 
 def greet(user, get_display_name):
@@ -176,19 +183,21 @@ def greet(user, get_display_name):
 
     if num_books > 0:
         message += """
+        
 [1] {}        
 """.format(get_display_name(books[0]))
 
     if num_books > 1:
         message += """
+        
 [2] {}        
 """.format(get_display_name(books[1]))
 
-    message += "\n\nPress ENTER to continue. "
+    message += "\n\n\nPress ENTER to continue. "
     input(message)
 
 
-def display_instructions():
+def display_instructions(new_user=False):
     title("Using the Library")
     message = """1) Wait for the video stream to initialize.
 
@@ -200,5 +209,5 @@ def display_instructions():
    
 4) To quit and logout, press "Q".
 
-Press ENTER to begin. """
+Press ENTER to {}. """.format('begin' if new_user else 'return')
     input(message)
