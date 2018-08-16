@@ -96,7 +96,7 @@ class Database:
                 book['year'])
 
             c.execute(command)
-            print('[INFO] Adding book to database')
+            # print('[INFO] Adding book to database')
 
         except Exception as e:
             print('[ERROR] Failed to add book')
