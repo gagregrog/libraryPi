@@ -86,7 +86,7 @@ class CsvHandler:
 
         return self.get_display_data(original_isbn, qr_code)
 
-    def get_display_data(self, isbn, qr_code):
+    def get_display_data(self, isbn, qr_code=False):
         if qr_code:
             isbn = self.qr_codes[isbn]
 
