@@ -72,7 +72,7 @@ def start_scanner(db, csv, user):
 
             if found_book:
                 cv2.putText(frame, found_book['display_name'], (x, y - 20),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, red, 1)
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, red, 2)
                 isbn = found_book['isbn']
 
                 if isbn != last_book_found.get('isbn'):
