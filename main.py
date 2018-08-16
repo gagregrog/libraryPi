@@ -12,7 +12,7 @@ def start_app():
     atexit.register(csv.write_new_to_csv)
     atexit.register(db.disconnect)
 
-    # command_line.start_labs()
+    command_line.start_labs()
     while True:
         user, new_user = command_line.handle_auth(db.add_user, db.check_credentials)
         if new_user:
