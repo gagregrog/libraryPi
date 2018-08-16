@@ -1,5 +1,6 @@
 import sqlite3
 import atexit
+import bcrypt
 
 
 book_table = """CREATE TABLE IF NOT EXISTS books (
@@ -14,9 +15,8 @@ book_table = """CREATE TABLE IF NOT EXISTS books (
                 );"""
 
 user_table = """CREATE TABLE IF NOT EXISTS users (
-                    id TEXT PRIMARY KEY,
-                    first_name TEXT,
-                    last_name TEXT,
+                    email TEXT PRIMARY KEY,
+                    hash TEXT,
                     isbn_1 TEXT,
                     isbn_2 TEXT,
                     created TEXT
@@ -28,8 +28,8 @@ class Database:
         atexit.register(self.disconnect)
         self.conn = sqlite3.connect(filename)
         self.create_tables()
-        print('[INFO] DB Loaded')
-        [print(row) for row in self.get_all_books()]
+        # print('[INFO] DB Loaded')
+        # [print(row) for row in self.get_all_books()]
 
     def disconnect(self):
         self.conn.commit()
@@ -45,20 +45,41 @@ class Database:
             print('[ERROR] Failed to create tables')
             print(e)
 
+    def check_credentials(self, user):
+        try:
+            db_user = self.get_user(user['email'])
+            if not db_user:
+                return None, 'not found'
+
+            is_authorized = bcrypt.checkpw(user['password'], db_user[1])
+
+            if is_authorized:
+                return db_user, None
+            else:
+                return None, 'unauthorized'
+
+        except Exception as e:
+            print('[ERROR] Failed to login')
+            print(e)
+
     def add_user(self, user):
         try:
-            c = self.conn.cursor()
-            command = """INSERT OR IGNORE INTO users (id, first_name, last_name, isbn_1, isbn_2, created)
-                            VALUES ("{}", "{}", "{}", "{}", "{}", CURRENT_TIMESTAMP)""".format(
+            db_user = self.get_user(user['email'])
+            if db_user:
+                return None, 'duplicate'
 
-                user['id'],
-                user['first_name'],
-                user['last_name'],
+            c = self.conn.cursor()
+            command = """INSERT OR IGNORE INTO users (email, hash, isbn_1, isbn_2, created)
+                            VALUES ("{}", "{}", "{}", "{}", CURRENT_TIMESTAMP)""".format(
+
+                user['email'],
+                user['hash'],
                 user.get('isbn_1'),
                 user.get('isbn_2'),
             )
 
             c.execute(command)
+            return user, None
 
         except Exception as e:
             print('[ERROR] Failed to add user')
@@ -98,10 +119,10 @@ class Database:
             print('[ERROR] Failed to get users')
             print(e)
 
-    def get_user(self, user_id):
+    def get_user(self, email):
         try:
             c = self.conn.cursor()
-            command = 'SELECT * FROM users WHERE id="{}"'.format(user_id)
+            command = 'SELECT * FROM users WHERE email="{}"'.format(email)
             c.execute(command)
 
             user = c.fetchone()
@@ -112,10 +133,10 @@ class Database:
             print('[ERROR] Failed to get users')
             print(e)
 
-    def checkout_book(self, user_id, book_id):
+    def checkout_book(self, email, book_id):
         try:
             c = self.conn.cursor()
-            get_user = 'SELECT isbn_1, isbn_2 FROM users WHERE id="{}"'.format(user_id)
+            get_user = 'SELECT isbn_1, isbn_2 FROM users WHERE email="{}"'.format(email)
             c.execute(get_user)
 
             result = c.fetchone()
@@ -131,11 +152,11 @@ class Database:
             idx = 'isbn_1' if isbn_1 == 'None' else 'isbn_2' if isbn_2 == 'None' else None
 
             if idx:
-                update_user = 'UPDATE users SET {idx}="{book_id}" WHERE id="{user_id}"'.format(
-                    idx=idx, book_id=book_id, user_id=user_id)
+                update_user = 'UPDATE users SET {idx}="{book_id}" WHERE email="{email}"'.format(
+                    idx=idx, book_id=book_id, email=email)
                 c.execute(update_user)
 
-                return self.get_user(user_id)
+                return self.get_user(email)
             else:
                 return 'Overdrawn'
 
@@ -143,10 +164,10 @@ class Database:
             print('[ERROR] Failed to check out book')
             print(e)
 
-    def return_book(self, user_id, book_id):
+    def return_book(self, email, book_id):
         try:
             c = self.conn.cursor()
-            get_user = 'SELECT isbn_1, isbn_2 FROM users WHERE id="{}"'.format(user_id)
+            get_user = 'SELECT isbn_1, isbn_2 FROM users WHERE email="{}"'.format(email)
             c.execute(get_user)
 
             result = c.fetchone()
@@ -164,12 +185,12 @@ class Database:
 
             isbn_2 = 'None'
 
-            update_user = 'UPDATE users SET isbn_1="{isbn_1}", isbn_2="{isbn_2}" WHERE id="{user_id}"'.format(
-                isbn_1=isbn_1, isbn_2=isbn_2, user_id=user_id)
+            update_user = 'UPDATE users SET isbn_1="{isbn_1}", isbn_2="{isbn_2}" WHERE email="{email}"'.format(
+                isbn_1=isbn_1, isbn_2=isbn_2, email=email)
 
             c.execute(update_user)
 
-            return self.get_user(user_id)
+            return self.get_user(email)
 
         except Exception as e:
             print('[ERROR] Failed to return book')
