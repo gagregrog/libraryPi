@@ -43,7 +43,6 @@ def start_julia():
 
 
 def login_or_signup():
-
     title("LibraryPi", "", "Concur Labs")
     fd = sys.stdin.fileno()
 
@@ -72,6 +71,8 @@ Please CREATE an account or LOGIN.
 
 [J] Julia Set Visualizer
 
+[Q] Quit
+
 """
 
     print(message)
@@ -80,7 +81,7 @@ Please CREATE an account or LOGIN.
         while 1:
             try:
                 c = sys.stdin.read(1)
-                if c in ['1', '2', 'j', 'J']:
+                if c in ['1', '2', 'j', 'J', 'q', 'Q']:
                     return c
             except IOError: pass
     finally:
@@ -146,8 +147,11 @@ def handle_auth(add_user_to_db, check_credentials_in_db):
             user, error = signup(add_user_to_db)
             if error == 'duplicate':
                 error = 'There is already an account associated with that email address.'
-        else:
+        elif intent.lower() == 'j':
             start_julia()
+            continue
+        else:
+            start_labs()
             continue
 
         if error:
@@ -194,7 +198,7 @@ def display_instructions():
 3) Once the book has been identified, press "O" to check it out, or "I" to check it in. 
    You may have at most two books checked out at the same time.
    
-4) To quit, press "Q"
+4) To quit and logout, press "Q".
 
 Press ENTER to begin. """
     input(message)
