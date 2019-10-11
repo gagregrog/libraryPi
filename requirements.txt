@@ -10,6 +10,6 @@ Pillow==5.2.0
 py-bcrypt==0.4
 pyfiglet==0.7.5
 pyzbar==0.1.7
-requests==2.19.1
+requests==2.20.0
 urllib3==1.23
 wcwidth==0.1.7
