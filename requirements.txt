@@ -5,7 +5,7 @@ future==0.16.0
 idna==2.7
 imutils==0.4.6
 isbnlib==3.9.1
-numpy==1.15.0
+numpy==1.22.0
 Pillow==6.2.0
 py-bcrypt==0.4
 pyfiglet==0.7.5
